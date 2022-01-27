@@ -35,6 +35,14 @@ class ConfigService {
             },
         };
     }
+
+    loadJWTConfig() {
+        return {
+            secret: process.env.JWT_KEY,
+            algorithm: process.env.JWT_ALGORITHM,
+            expiresIn: process.env.JWT_EXPIRE,
+        };
+    }
 }
 
 module.exports = new ConfigService();
