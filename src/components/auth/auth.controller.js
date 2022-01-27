@@ -8,11 +8,13 @@ module.exports = class AuthController {
         return asyncHandler(async (req, res) => {
             const { email, password } = req.body;
 
-            const r = await AuthService.login(email, password);
+            const { user, token } = await AuthService.login(email, password);
+
+            // ! set cookie
 
             res.json({
                 message: 'success',
-                data: r,
+                data: user,
             });
         });
     }
@@ -22,22 +24,21 @@ module.exports = class AuthController {
             console.log(req.body);
             const { username, email, password } = req.body;
 
-            const r = await AuthService.register(username, email, password);
+            const user = await AuthService.register(username, email, password);
 
             res.json({
                 message: 'success',
-                data: r,
+                data: user,
             });
         });
     }
 
     static logout() {
         return asyncHandler(async (req, res) => {
-            const r = await AuthService.logout('tokenString');
+            // ! clear user from cookies
 
             res.json({
                 message: 'success',
-                data: r,
             });
         });
     }
@@ -46,11 +47,10 @@ module.exports = class AuthController {
         return asyncHandler(async (req, res) => {
             const { email } = req.body;
 
-            const r = await AuthService.forgotPassword(email);
+            await AuthService.forgotPassword(email);
 
             res.json({
                 message: 'success',
-                data: r,
             });
         });
     }
@@ -58,23 +58,22 @@ module.exports = class AuthController {
     static resetPassword() {
         return asyncHandler(async (req, res) => {
             const { password } = req.body;
+            const { resetToken } = req.params;
 
-            const r = await AuthService.changePassword('resetToken', password);
+            await AuthService.changePassword(resetToken, password);
 
             res.json({
                 message: 'success',
-                data: r,
             });
         });
     }
 
     static confirmMail() {
         return asyncHandler(async (req, res) => {
-            const r = await AuthService.confirmMail('mailToken');
+            await AuthService.confirmMail('mailToken');
 
             res.json({
                 message: 'success',
-                data: r,
             });
         });
     }
