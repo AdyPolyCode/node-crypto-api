@@ -1,6 +1,6 @@
 const User = require('./model/User');
 
-const { NotFoun, Validation } = require('../../errors');
+const { NotFound, Validation } = require('../../errors');
 
 class UserService {
     static async findById(id) {
