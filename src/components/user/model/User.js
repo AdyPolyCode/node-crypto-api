@@ -1,7 +1,9 @@
 const { Schema, model } = require('mongoose');
-const { randomBytes, pbkdf2Sync } = require('crypto');
+const jwt = require('jsonwebtoken');
 
-// TODO: add hooks
+const { randomBytes, pbkdf2Sync, createHash } = require('crypto');
+
+const ConfigService = require('../../../config/config.service');
 
 const UserSchema = new Schema(
     {
@@ -27,6 +29,16 @@ const UserSchema = new Schema(
             type: String,
             required: true,
         },
+        resetToken: {
+            type: String,
+            unique: true,
+            default: undefined,
+        },
+        mailToken: {
+            type: String,
+            unique: true,
+            default: undefined,
+        },
         isVerified: {
             type: Boolean,
             default: false,
@@ -42,7 +54,7 @@ const UserSchema = new Schema(
 
 UserSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
-        this.salt = randomBytes(16).toString('base64');
+        this.salt = randomBytes(32).toString('hex');
         this.password = this.hashPassword(this.password);
     }
 
@@ -51,13 +63,7 @@ UserSchema.pre('save', async function (next) {
 
 UserSchema.methods.hashPassword = function (password) {
     if (this.salt && password) {
-        return pbkdf2Sync(
-            password,
-            Buffer.from(this.salt, 'base64'),
-            1000,
-            64,
-            'sha256'
-        );
+        return pbkdf2Sync(password, Buffer.from(this.salt, 'base64'), 1000, 64);
     } else {
         return password;
     }
@@ -65,6 +71,20 @@ UserSchema.methods.hashPassword = function (password) {
 
 UserSchema.methods.comparePassword = function (password) {
     return this.password === this.hashPassword(password);
+};
+
+UserSchema.methods.createToken = function () {
+    const token = randomBytes(16).toString('base64');
+
+    const hash = createHash('sha256').update(token).digest('hex');
+
+    return hash;
+};
+
+UserSchema.methods.createJWT = function () {
+    const { secret, algorithm, expiresIn } = ConfigService.loadJWTConfig();
+
+    return jwt.sign({ id: this._id }, secret, { algorithm, expiresIn });
 };
 
 module.exports = model('User', UserSchema);
