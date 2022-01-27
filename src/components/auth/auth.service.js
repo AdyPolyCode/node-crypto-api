@@ -1,31 +1,69 @@
 const UserService = require('../user/user.service');
 const { MailService, MessageQueueService } = require('../../utils');
+const { Unauthorized } = require('../../errors');
 
 // TODO: after testing finish proper implementation
 // TODO: implement jwt based auth
 
-module.exports = class AuthService {
-    static async register(username, email, password) {
-        return { username, email, password };
+class AuthService {
+    constructor(userService, mailService, messageQueueService) {
+        this.userService = new userService();
+        this.mailService = new mailService();
+        this.messageQueueService = new messageQueueService();
     }
 
-    static async login(email, password) {
-        return { email, password };
+    async register(username, email, password) {
+        const user = await this.userService.create(username, email, password);
+
+        // ! use mailservice
+
+        return user;
     }
 
-    static async logout(tokenString) {
-        return { tokenString };
+    async login(email, password) {
+        const user = await this.userService.findByEmail(email);
+
+        const validPassword = user.comparePassword(password);
+
+        if (!validPassword) {
+            throw new Unauthorized('Invalid credentials');
+        }
+
+        // ! create jwt
+
+        const token = null;
+
+        return { user, token };
     }
 
-    static async changePassword(resetToken, password) {
-        return { resetToken, password };
+    async changePassword(resetToken, password) {
+        const user = await this.userService.findByResetToken(resetToken);
+
+        const hash = user.hashPassword(password);
+
+        user.password = hash;
+
+        await user.save();
+
+        return;
     }
 
-    static async confirmMail(mailToken) {
-        return { mailToken };
+    async confirmMail(mailToken) {
+        const user = await this.userService.findByMailToken(mailToken);
+
+        user.mail = undefined;
+        user.isVerified = true;
+
+        await user.save();
     }
 
-    static async forgotPassword(email) {
-        return { email };
+    async forgotPassword(email) {
+        const user = await this.userService.findByEmail(email);
+
+        const token = user.createToken();
+
+        // ! use mailservice
     }
-};
+}
+
+module.exports = new AuthService(UserService, MailService, MessageQueueService);
