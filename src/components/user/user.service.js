@@ -1,6 +1,6 @@
 const User = require('./model/User');
 
-const { NotFound } = require('../../errors');
+const { NotFoun, Validation } = require('../../errors');
 
 class UserService {
     static async findById(id) {
@@ -47,6 +47,26 @@ class UserService {
 
         if (!user) {
             throw new NotFound(`Could not find "user" with ${id}`);
+        }
+
+        return user;
+    }
+
+    static async findByResetToken(token) {
+        const user = await User.findOne({ resetToken: token });
+
+        if (!user) {
+            throw new Validation(`Invalid token: ${token}`);
+        }
+
+        return user;
+    }
+
+    static async findByMailToken(token) {
+        const user = await User.findOne({ mailToken: token });
+
+        if (!user) {
+            throw new Validation(`Invalid token: ${token}`);
         }
 
         return user;
