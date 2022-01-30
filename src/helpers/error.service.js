@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const Parser = require('./common/parser');
-const logger = require('./logger.service');
+const LoggerService = require('./logger.service');
 
 const { NotFound } = require('../errors');
 
@@ -17,7 +17,13 @@ class ErrorService extends Parser {
         },
     };
 
-    #parse(error) {
+    constructor() {
+        super();
+
+        this.handleException = this.handleException.bind(this);
+    }
+
+    parse(error) {
         super.parse(error);
 
         if (error instanceof mongoose.Error) {
@@ -28,12 +34,12 @@ class ErrorService extends Parser {
     }
 
     handleException(err, req, res, next) {
-        const { message, statusCode } = this.#parse(err);
+        const { message, statusCode } = this.parse(err);
 
-        logger.error(error.message);
+        LoggerService.error(err.message);
 
-        res.status(statusCode).json({
-            message,
+        res.status(statusCode || 500).json({
+            message: message || 'Server error',
         });
     }
 
