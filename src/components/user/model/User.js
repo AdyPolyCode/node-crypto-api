@@ -27,7 +27,6 @@ const UserSchema = new Schema(
         },
         salt: {
             type: String,
-            required: false,
         },
         resetToken: {
             type: String,
