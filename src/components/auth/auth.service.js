@@ -1,15 +1,16 @@
 const UserService = require('../user/user.service');
-const { MailService, MessageQueueService } = require('../../utils');
+const { MailService } = require('../../utils');
 const { Unauthorized } = require('../../errors');
 
 // TODO: after testing finish proper implementation
 // TODO: implement jwt based auth
 
+// TODO: stringify payload before mail
+
 class AuthService {
-    constructor(userService, mailService, messageQueueService) {
+    constructor(userService, mailService) {
         this.userService = new userService();
         this.mailService = new mailService();
-        this.messageQueueService = new messageQueueService();
     }
 
     async register(username, email, password) {
@@ -66,4 +67,4 @@ class AuthService {
     }
 }
 
-module.exports = new AuthService(UserService, MailService, MessageQueueService);
+module.exports = new AuthService(UserService, MailService);
