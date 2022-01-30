@@ -60,7 +60,9 @@ UserSchema.pre('save', async function (next) {
 
 UserSchema.methods.hashPassword = function (password) {
     if (this.salt && password) {
-        return pbkdf2Sync(password, Buffer.from(this.salt), 1000, 64, 'sha256');
+        return pbkdf2Sync(password, this.salt, 10000, 64, 'sha256').toString(
+            'hex'
+        );
     } else {
         return password;
     }
