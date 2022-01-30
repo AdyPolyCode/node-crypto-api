@@ -15,6 +15,10 @@ class ErrorService extends Parser {
             statusCode: 400,
             message: 'Invalid object identifier',
         },
+        ValidationError: {
+            statusCode: 422,
+            message: null,
+        },
     };
 
     constructor() {
@@ -26,11 +30,19 @@ class ErrorService extends Parser {
     parse(error) {
         super.parse(error);
 
+        const result = { message: error.message, statusCode: error.statusCode };
+
         if (error instanceof mongoose.Error) {
-            error = this.#mongooseOptions[error.code || error.name];
+            const err = this.#mongooseOptions[error.code || error.name];
+
+            if (err.message) {
+                result.message = err.message;
+            }
+
+            result.statusCode = err.statusCode;
         }
 
-        return { message: error.message, statusCode: error.statusCode };
+        return result;
     }
 
     handleException(err, req, res, next) {
