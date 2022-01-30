@@ -19,7 +19,7 @@ describe('authentication endpoints', () => {
         }
     });
 
-    describe('given user based post endpoints', () => {
+    describe('given user based post/get endpoints', () => {
         it('/register', async () => {
             const payload = {
                 username: 'adamoss',
@@ -32,11 +32,11 @@ describe('authentication endpoints', () => {
                 .send(payload);
 
             const responseObject = {
-                data: payload,
+                data: { email: payload.email },
                 message: 'success',
             };
 
-            expect(response.statusCode).toEqual(200);
+            expect(response.statusCode).toEqual(201);
             expect(response.body).toEqual(responseObject);
         });
 
@@ -51,7 +51,7 @@ describe('authentication endpoints', () => {
                 .send(payload);
 
             const responseObject = {
-                data: payload,
+                data: { email: payload.email },
                 message: 'success',
             };
 
@@ -60,7 +60,14 @@ describe('authentication endpoints', () => {
         });
 
         it('/logout', async () => {
-            const response = await request(app);
+            const response = await request(app).get('/api/auth/logout');
+
+            const responseObject = {
+                message: 'success',
+            };
+
+            expect(response.statusCode).toEqual(200);
+            expect(response.body).toEqual(responseObject);
         });
 
         it('/forgot-password', async () => {
@@ -125,6 +132,8 @@ describe('authentication endpoints', () => {
 
     afterAll(async () => {
         try {
+            await mongoose.model('User').deleteMany();
+
             await mongoose.connection.close();
         } catch (error) {
             console.log(error.message);
