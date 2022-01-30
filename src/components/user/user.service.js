@@ -3,7 +3,7 @@ const User = require('./model/User');
 const { NotFound, Validation } = require('../../errors');
 
 class UserService {
-    static async findById(id) {
+    async findById(id) {
         const user = await User.findById(id);
 
         if (!user) {
@@ -13,8 +13,8 @@ class UserService {
         return user;
     }
 
-    static async findByEmail(email) {
-        const user = await User.findOne(email);
+    async findByEmail(email) {
+        const user = await User.findOne({ email });
 
         if (!user) {
             throw new NotFound(`Could not find "user" with ${email}`);
@@ -23,17 +23,14 @@ class UserService {
         return user;
     }
 
-    static async create(username, email, password) {
+    async create(username, email, password) {
         const user = await User.create({ username, email, password });
 
         return user;
     }
 
-    static async deleteById(id) {
-        const user = await User.findByIdAndDelete(
-            { _id: id },
-            { returnDocument: true }
-        );
+    async deleteById(id) {
+        const user = await User.findByIdAndDelete(id, { returnDocument: true });
 
         if (!user) {
             throw new NotFound(`Could not find "user" with ${id}`);
@@ -42,7 +39,7 @@ class UserService {
         return user;
     }
 
-    static async updateById(id, payload) {
+    async updateById(id, payload) {
         const user = await User.findByIdAndUpdate(id, payload, { new: true });
 
         if (!user) {
@@ -52,7 +49,7 @@ class UserService {
         return user;
     }
 
-    static async findByResetToken(token) {
+    async findByResetToken(token) {
         const user = await User.findOne({ resetToken: token });
 
         if (!user) {
@@ -62,7 +59,7 @@ class UserService {
         return user;
     }
 
-    static async findByMailToken(token) {
+    async findByMailToken(token) {
         const user = await User.findOne({ mailToken: token });
 
         if (!user) {
