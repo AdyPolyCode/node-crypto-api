@@ -1,35 +1,40 @@
+const mongoose = require('mongoose');
+
 const Parser = require('./common/parser');
 const logger = require('./logger.service');
 
 const { NotFound } = require('../errors');
 
-// TODO: implement parse options for mongo
-
 class ErrorService extends Parser {
     #mongooseOptions = {
         11000: {
             statusCode: 400,
-            message: 'Record already exists - ',
+            message: 'Object already exists',
         },
         CastError: {
-            statusCode: 409,
-            message: 'Record already exists - ',
+            statusCode: 400,
+            message: 'Invalid object identifier',
         },
     };
 
-    parse(...args) {
-        super.parse(...args);
+    #parse(error) {
+        super.parse(error);
 
-        const unit = args.length <= 1 ? args[0] : args;
+        if (error instanceof mongoose.Error) {
+            error = this.#mongooseOptions[error.code || error.name];
+        }
 
-        return error;
+        return { message: error.message, statusCode: error.statusCode };
     }
 
     handleException(err, req, res, next) {
-        const error = { ...err };
-        error.message = err.message;
+        const { message, statusCode } = this.#parse(err);
 
         logger.error(error.message);
+
+        res.status(statusCode).json({
+            message,
+        });
     }
 
     handleNotFound(req, res, next) {
