@@ -27,16 +27,14 @@ const UserSchema = new Schema(
         },
         salt: {
             type: String,
-            required: true,
+            required: false,
         },
         resetToken: {
             type: String,
-            unique: true,
             default: undefined,
         },
         mailToken: {
             type: String,
-            unique: true,
             default: undefined,
         },
         isVerified: {
@@ -54,7 +52,7 @@ const UserSchema = new Schema(
 
 UserSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
-        this.salt = randomBytes(32).toString('hex');
+        this.salt = randomBytes(32).toString('base64');
         this.password = this.hashPassword(this.password);
     }
 
@@ -63,7 +61,7 @@ UserSchema.pre('save', async function (next) {
 
 UserSchema.methods.hashPassword = function (password) {
     if (this.salt && password) {
-        return pbkdf2Sync(password, Buffer.from(this.salt, 'base64'), 1000, 64);
+        return pbkdf2Sync(password, Buffer.from(this.salt), 1000, 64, 'sha256');
     } else {
         return password;
     }
