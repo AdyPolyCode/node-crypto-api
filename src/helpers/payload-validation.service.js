@@ -1,13 +1,13 @@
 module.exports = class PayloadValidationService {
     static validate(schema) {
         return async (req, res, next) => {
-            const { error } = await schema.validateAsync(req.body);
+            try {
+                await schema.validateAsync(req.body);
 
-            if (error) {
-                throw new Validation(error.message);
+                next();
+            } catch (error) {
+                next(new Validation(error.message));
             }
-
-            next();
         };
     }
 };
