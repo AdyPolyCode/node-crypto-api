@@ -14,7 +14,9 @@ module.exports = class AuthController {
 
             res.json({
                 message: 'success',
-                data: user,
+                data: {
+                    email: user.email,
+                },
             });
         });
     }
@@ -26,9 +28,11 @@ module.exports = class AuthController {
 
             const user = await AuthService.register(username, email, password);
 
-            res.json({
+            res.status(201).json({
                 message: 'success',
-                data: user,
+                data: {
+                    email: user.email,
+                },
             });
         });
     }
