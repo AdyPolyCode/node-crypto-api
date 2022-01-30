@@ -10,7 +10,8 @@
     "scripts": {
         "dev": "nodemon index.js",
         "test": "jest",
-        "test:auth": "test/auth.test.js"
+        "test:auth": "jest auth.test.js",
+        "test:crypto": "jest crypto.test.js"
     },
     "keywords": [],
     "author": "",
