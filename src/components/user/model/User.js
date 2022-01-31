@@ -63,9 +63,9 @@ UserSchema.methods.hashPassword = function (password) {
         return pbkdf2Sync(password, this.salt, 10000, 64, 'sha256').toString(
             'hex'
         );
-    } else {
-        return password;
     }
+
+    return password;
 };
 
 UserSchema.methods.comparePassword = function (password) {
