@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const AuthService = require('./auth.service');
 
-// TODO: after testing finish proper implementation
+// TODO: finish proper implementation
 
 module.exports = class AuthController {
     static login() {
@@ -10,9 +10,7 @@ module.exports = class AuthController {
 
             const { user, token } = await AuthService.login(email, password);
 
-            // ! set cookie
-
-            res.json({
+            res.cookie('jwt', token, { httpOnly: true, secure: false }).json({
                 message: 'success',
                 data: {
                     email: user.email,
@@ -23,15 +21,21 @@ module.exports = class AuthController {
 
     static register() {
         return asyncHandler(async (req, res) => {
-            console.log(req.body);
             const { username, email, password } = req.body;
 
-            const user = await AuthService.register(username, email, password);
+            const { user, mailToken } = await AuthService.register(
+                username,
+                email,
+                password
+            );
+
+            res.setHeader('mailToken', mailToken);
 
             res.status(201).json({
                 message: 'success',
                 data: {
                     email: user.email,
+                    url: '',
                 },
             });
         });
@@ -39,8 +43,9 @@ module.exports = class AuthController {
 
     static logout() {
         return asyncHandler(async (req, res) => {
-            // ! clear user from cookies
-
+            res.clearCookie('jwt', { httpOnly: true, secure: false }).json({
+                message: 'success',
+            });
             res.json({
                 message: 'success',
             });
@@ -51,7 +56,9 @@ module.exports = class AuthController {
         return asyncHandler(async (req, res) => {
             const { email } = req.body;
 
-            await AuthService.forgotPassword(email);
+            const { resetToken } = await AuthService.forgotPassword(email);
+
+            res.setHeader('resetToken', resetToken);
 
             res.json({
                 message: 'success',
