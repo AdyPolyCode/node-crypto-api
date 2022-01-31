@@ -1,23 +1,23 @@
 const dotenv = require('dotenv');
 
 class ConfigService {
-    envs = {
-        development: {
-            logFormat: {
-                colorForm: {
-                    all: true,
-                },
-                labelForm: {
-                    label: ' -$DevLog$-',
-                },
-                printer: (info) =>
-                    `${info.label} - ${info.level} - ${info.message}`,
-            },
-        },
-    };
-
     constructor() {
         dotenv.config({});
+
+        this.envs = {
+            development: {
+                logFormat: {
+                    colorForm: {
+                        all: true,
+                    },
+                    labelForm: {
+                        label: ' -$DevLog$-',
+                    },
+                    printer: (info) =>
+                        `${info.label} - ${info.level} - ${info.message}`,
+                },
+            },
+        };
     }
 
     getValue(key) {
