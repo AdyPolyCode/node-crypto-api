@@ -2,6 +2,7 @@ const express = require('express');
 
 const helmet = require('helmet');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const { ErrorService } = require('../helpers');
 
@@ -18,6 +19,7 @@ module.exports = (app) => {
     app.use(helmet());
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
+    app.use(cookieParser());
 
     if (process.env.NODE_ENV === 'dev') {
         app.use(require('morgan')('dev'));
