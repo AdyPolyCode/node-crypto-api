@@ -1,5 +1,5 @@
 {
-    "module": "",
+    "type": "commonjs",
     "name": "express-crypto-api",
     "version": "1.0.0",
     "description": "Crypto currency review/checkup api",
@@ -14,7 +14,7 @@
         "test:crypto": "jest crypto.test.js"
     },
     "keywords": [],
-    "author": "",
+    "author": "Ady",
     "license": "MIC",
     "devDependencies": {
         "eslint": "^8.7.0",
