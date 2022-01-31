@@ -2,10 +2,7 @@ const UserService = require('../user/user.service');
 const { MailService } = require('../../utils');
 const { Unauthorized } = require('../../errors');
 
-// TODO: after testing finish proper implementation
-// TODO: implement jwt based auth
-
-// TODO: stringify payload before mail
+// TODO: finish proper implementation
 
 class AuthService {
     constructor(userService, mailService) {
@@ -16,9 +13,15 @@ class AuthService {
     async register(username, email, password) {
         const user = await this.userService.create(username, email, password);
 
+        const mailToken = user.createToken();
+
+        user.mailToken = mailToken;
+
+        user.save();
+
         // ! use mailservice
 
-        return user;
+        return { user, mailToken };
     }
 
     async login(email, password) {
@@ -30,9 +33,7 @@ class AuthService {
             throw new Unauthorized('Invalid credentials');
         }
 
-        // ! create jwt
-
-        const token = null;
+        const token = user.createJWT();
 
         return { user, token };
     }
@@ -45,8 +46,6 @@ class AuthService {
         user.password = hash;
 
         await user.save();
-
-        return;
     }
 
     async confirmMail(mailToken) {
@@ -61,9 +60,11 @@ class AuthService {
     async forgotPassword(email) {
         const user = await this.userService.findByEmail(email);
 
-        const token = user.createToken();
+        const resetToken = user.createToken();
 
         // ! use mailservice
+
+        return { resetToken };
     }
 }
 
