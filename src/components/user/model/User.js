@@ -50,7 +50,7 @@ const UserSchema = new Schema(
 );
 
 UserSchema.pre('save', async function (next) {
-    if (this.isModified('password')) {
+    if (!this.salt && this.isModified('password')) {
         this.salt = randomBytes(32).toString('base64');
         this.password = this.hashPassword(this.password);
     }
