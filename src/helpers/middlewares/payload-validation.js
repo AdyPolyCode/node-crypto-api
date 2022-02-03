@@ -1,3 +1,5 @@
+const { Validation } = require('../../errors');
+
 module.exports = class PayloadValidation {
     static validate(schema) {
         return async (req, res, next) => {
