@@ -43,6 +43,7 @@ class AuthController extends ServiceHandler {
                 message: 'success',
                 data: {
                     email: user.email,
+                    mailToken,
                     url,
                 },
             });
@@ -61,22 +62,28 @@ class AuthController extends ServiceHandler {
         return asyncHandler(async (req, res) => {
             const { email } = req.body;
 
-            const { resetToken } = await this.authService.forgotPassword(email);
+            const { resetToken, url } = await this.authService.forgotPassword(
+                email
+            );
 
             res.setHeader('resetToken', resetToken);
 
             res.json({
                 message: 'success',
+                url,
             });
         });
     }
 
     resetPassword() {
         return asyncHandler(async (req, res) => {
-            const { password } = req.body;
+            const { password1: password } = req.body;
+
             const { resetToken } = req.params;
 
             await this.authService.changePassword(resetToken, password);
+
+            res.removeHeader('resetToken');
 
             res.json({
                 message: 'success',
@@ -86,7 +93,11 @@ class AuthController extends ServiceHandler {
 
     confirmMail() {
         return asyncHandler(async (req, res) => {
-            await this.authService.confirmMail('mailToken');
+            const { mailToken } = req.params;
+
+            await this.authService.confirmMail(mailToken);
+
+            res.removeHeader('mailToken');
 
             res.json({
                 message: 'success',
