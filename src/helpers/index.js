@@ -5,4 +5,6 @@ module.exports = {
     PayloadValidation: require('./middlewares/payload-validation'),
     Authentication: require('./middlewares/authentication'),
     Authorization: require('./middlewares/authorization'),
+    Factory: require('./factory'),
+    ServiceHandler: require('./service-handler'),
 };
