@@ -56,7 +56,7 @@ class AuthService extends ServiceHandler {
     async confirmMail(mailToken) {
         const user = await this.userService.findByMailToken(mailToken);
 
-        user.mail = undefined;
+        user.mailToken = undefined;
         user.isVerified = true;
 
         await user.save();
@@ -67,9 +67,17 @@ class AuthService extends ServiceHandler {
 
         const resetToken = user.createToken();
 
-        // ! use mailservice
+        user.resetToken = resetToken;
 
-        return { resetToken };
+        await user.save();
+
+        const url = await this.mailService.mailIt(
+            'password-reset',
+            resetToken,
+            user.email
+        );
+
+        return { resetToken, url };
     }
 }
 
