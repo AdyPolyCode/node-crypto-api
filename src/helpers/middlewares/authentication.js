@@ -1,24 +1,13 @@
 const { verify, decode } = require('jsonwebtoken');
-const { model } = require('mongoose');
 
 const { Unauthorized, BadRequest } = require('../../errors');
 const ConfigService = require('../../config/config.service');
+const UserService = require('../../components/user/user.service');
 
 class Authentication {
-    constructor() {
+    constructor(userService) {
+        this.userService = new userService();
         this.authenticate = this.#authenticateIt.bind(this);
-    }
-
-    #validateHeaderToken(token) {
-        if (!token) {
-            return;
-        }
-
-        const user = model('User').findOne({ mailToken: token });
-
-        if (!user.isVerified) {
-            throw new Unauthorized('Please confirm your email');
-        }
     }
 
     #validateJWT(token) {
@@ -40,29 +29,29 @@ class Authentication {
 
     /* eslint-disable consistent-return */
     async #authenticateIt(req, res, next) {
-        this.#validateHeaderToken(req.headers.mailToken);
+        try {
+            const cookieToken = req.cookies.jwt;
 
-        const cookieToken = req.cookies.jwt;
+            if (!cookieToken) {
+                return next(new Unauthorized('Authentication is required'));
+            }
 
-        if (!cookieToken) {
-            return next(new Unauthorized('Authentication is required'));
+            const token = this.#validateJWT(cookieToken);
+
+            const user = await this.userService.findById(token.id);
+
+            if (!user.isVerified) {
+                return next(new BadRequest('Please confirm your email'));
+            }
+
+            req.userId = token.id;
+
+            next();
+        } catch (error) {
+            next(error);
         }
-
-        const token = this.#validateJWT(cookieToken);
-
-        const user = await model('User')
-            .findById(token.id)
-            .select('-password -salt -__v -createdAt -updatedAt');
-
-        if (!user.isVerified) {
-            return next(new BadRequest('Please verify your email'));
-        }
-
-        req.user = user;
-
-        next();
     }
     /* eslint-enable consistent-return */
 }
 
-module.exports = new Authentication();
+module.exports = new Authentication(UserService);
