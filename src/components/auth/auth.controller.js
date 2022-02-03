@@ -1,14 +1,22 @@
 const asyncHandler = require('express-async-handler');
+
 const AuthService = require('./auth.service');
 
-// TODO: finish proper implementation
+const { Factory, ServiceHandler } = require('../../helpers');
 
-module.exports = class AuthController {
-    static login() {
+class AuthController extends ServiceHandler {
+    constructor(...services) {
+        super(services);
+    }
+
+    login() {
         return asyncHandler(async (req, res) => {
             const { email, password } = req.body;
 
-            const { user, token } = await AuthService.login(email, password);
+            const { user, token } = await this.authService.login(
+                email,
+                password
+            );
 
             res.cookie('jwt', token, { httpOnly: true, secure: false }).json({
                 message: 'success',
@@ -19,11 +27,11 @@ module.exports = class AuthController {
         });
     }
 
-    static register() {
+    register() {
         return asyncHandler(async (req, res) => {
             const { username, email, password } = req.body;
 
-            const { user, mailToken } = await AuthService.register(
+            const { user, mailToken, url } = await this.authService.register(
                 username,
                 email,
                 password
@@ -35,28 +43,25 @@ module.exports = class AuthController {
                 message: 'success',
                 data: {
                     email: user.email,
-                    url: '',
+                    url,
                 },
             });
         });
     }
 
-    static logout() {
+    logout() {
         return asyncHandler(async (req, res) => {
             res.clearCookie('jwt', { httpOnly: true, secure: false }).json({
-                message: 'success',
-            });
-            res.json({
                 message: 'success',
             });
         });
     }
 
-    static forgotPassword() {
+    forgotPassword() {
         return asyncHandler(async (req, res) => {
             const { email } = req.body;
 
-            const { resetToken } = await AuthService.forgotPassword(email);
+            const { resetToken } = await this.authService.forgotPassword(email);
 
             res.setHeader('resetToken', resetToken);
 
@@ -66,12 +71,12 @@ module.exports = class AuthController {
         });
     }
 
-    static resetPassword() {
+    resetPassword() {
         return asyncHandler(async (req, res) => {
             const { password } = req.body;
             const { resetToken } = req.params;
 
-            await AuthService.changePassword(resetToken, password);
+            await this.authService.changePassword(resetToken, password);
 
             res.json({
                 message: 'success',
@@ -79,13 +84,15 @@ module.exports = class AuthController {
         });
     }
 
-    static confirmMail() {
+    confirmMail() {
         return asyncHandler(async (req, res) => {
-            await AuthService.confirmMail('mailToken');
+            await this.authService.confirmMail('mailToken');
 
             res.json({
                 message: 'success',
             });
         });
     }
-};
+}
+
+module.exports = Factory.create(AuthController, AuthService);

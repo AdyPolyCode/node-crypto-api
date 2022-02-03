@@ -1,13 +1,14 @@
 const UserService = require('../user/user.service');
-const { MailService } = require('../../utils');
+
 const { Unauthorized } = require('../../errors');
 
-// TODO: finish proper implementation
+const { MailService } = require('../../utils');
 
-class AuthService {
-    constructor(userService, mailService) {
-        this.userService = new userService();
-        this.mailService = new mailService();
+const { Factory, ServiceHandler } = require('../../helpers');
+
+class AuthService extends ServiceHandler {
+    constructor(...services) {
+        super(services);
     }
 
     async register(username, email, password) {
@@ -19,9 +20,13 @@ class AuthService {
 
         user.save();
 
-        // ! use mailservice
+        const url = await this.mailService.mailIt(
+            'mail-confirmation',
+            mailToken,
+            user.email
+        );
 
-        return { user, mailToken };
+        return { user, mailToken, url };
     }
 
     async login(email, password) {
@@ -68,4 +73,4 @@ class AuthService {
     }
 }
 
-module.exports = new AuthService(UserService, MailService);
+module.exports = Factory.create(null, AuthService, UserService, MailService);

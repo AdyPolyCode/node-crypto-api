@@ -1,6 +1,7 @@
 const Router = require('express').Router({ caseSensitive: true });
 
 const AuthController = require('./auth.controller');
+
 const { PayloadValidation, Authentication } = require('../../helpers');
 const { login, register, forgotPassword, resetPassword } = require('./schemas');
 
