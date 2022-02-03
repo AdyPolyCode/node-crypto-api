@@ -34,7 +34,7 @@ module.exports = class MailService {
 
         const { urlPath } = this.#options[type];
 
-        return `http://localhost${port}${urlPath}/${token}`;
+        return `http://localhost:${port}${urlPath}/${token}`;
     }
 
     #createTemplate(type, url, message) {
