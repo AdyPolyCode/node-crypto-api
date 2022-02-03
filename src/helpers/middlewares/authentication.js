@@ -1,12 +1,12 @@
 const { verify, decode } = require('jsonwebtoken');
 const { model } = require('mongoose');
 
-const { Unauthorized } = require('../../errors');
+const { Unauthorized, BadRequest } = require('../../errors');
 const ConfigService = require('../../config/config.service');
 
 class Authentication {
     constructor() {
-        this.authenticate = this.authenticateIt.bind(this);
+        this.authenticate = this.#authenticateIt.bind(this);
     }
 
     #validateHeaderToken(token) {
@@ -38,21 +38,31 @@ class Authentication {
         return decode(token);
     }
 
-    async authenticateIt(req, res, next) {
+    /* eslint-disable consistent-return */
+    async #authenticateIt(req, res, next) {
         this.#validateHeaderToken(req.headers.mailToken);
 
         const cookieToken = req.cookies.jwt;
 
         if (!cookieToken) {
-            throw new Unauthorized('Authentication is required');
+            return next(new Unauthorized('Authentication is required'));
         }
 
         const token = this.#validateJWT(cookieToken);
 
-        req.userId = token.id;
+        const user = await model('User')
+            .findById(token.id)
+            .select('-password -salt -__v -createdAt -updatedAt');
+
+        if (!user.isVerified) {
+            return next(new BadRequest('Please verify your email'));
+        }
+
+        req.user = user;
 
         next();
     }
+    /* eslint-enable consistent-return */
 }
 
 module.exports = new Authentication();
