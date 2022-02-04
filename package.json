@@ -11,7 +11,9 @@
         "dev": "nodemon index.js",
         "test": "jest",
         "test:auth": "jest auth.test.js",
-        "test:crypto": "jest crypto.test.js"
+        "test:crypto": "jest crypto.test.js",
+        "test:socket-io": "jest socket-io.test.js",
+        "test:socket": "jest socket-server.test.js"
     },
     "keywords": [],
     "author": "Ady",
@@ -40,7 +42,8 @@
         "jsonwebtoken": "^8.5.1",
         "mongoose": "^6.1.8",
         "nodemailer": "^6.7.2",
-        "socket.io": "^4.4.1"
+        "socket.io": "^4.4.1",
+        "socket.io-client": "^4.4.1"
     },
     "jest": {
         "testEnvironment": "node",
