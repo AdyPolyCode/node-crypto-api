@@ -3,6 +3,7 @@ const databaseLoader = require('./database.loader.js');
 
 const ConfigService = require('../config/config.service');
 const { LoggerService } = require('../helpers');
+const webSocketLoader = require('./web-socket.loader');
 
 module.exports = async (expressApp) => {
     try {
@@ -13,9 +14,11 @@ module.exports = async (expressApp) => {
 
         const app = expressLoader(expressApp);
 
-        app.listen(PORT, () => {
+        const server = app.listen(PORT, () => {
             LoggerService.info(`Server is listening at: ${PORT}`);
         });
+
+        webSocketLoader(server);
     } catch (error) {
         LoggerService.error(error.message);
 
