@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const { format, addColors, transports, createLogger } = require('winston');
 
 const {
