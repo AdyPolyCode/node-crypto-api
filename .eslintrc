@@ -20,7 +20,7 @@
         "consistent-return": "warn",
         "no-unused-vars": "warn",
         "multiline-comment-style": "off",
-        "operator-linebreak": "warn",
+        "operator-linebreak": "off",
         "class-methods-use-this": "off",
         "func-names": "off",
         "no-underscore-dangle": "off",
