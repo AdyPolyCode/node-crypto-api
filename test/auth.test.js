@@ -14,12 +14,15 @@ describe('authentication endpoints', () => {
         try {
             await connectDB(process.env.TEST_MONGO_URI);
         } catch (error) {
-            console.log(error.message);
             process.exit(1);
         }
     });
 
-    describe('given user based post/get endpoints', () => {
+    describe('given user based post/get success endpoints', () => {
+        let cookie;
+        let mailToken;
+        let resetToken;
+
         it('/register', async () => {
             const payload = {
                 username: 'adamoss',
@@ -31,13 +34,22 @@ describe('authentication endpoints', () => {
                 .post('/api/auth/register')
                 .send(payload);
 
-            const responseObject = {
-                data: { email: payload.email },
-                message: 'success',
-            };
+            mailToken = response.headers.mailtoken;
 
             expect(response.statusCode).toEqual(201);
-            expect(response.body).toEqual(responseObject);
+            expect(response.body).toHaveProperty('data');
+            expect(response.body.data).toHaveProperty('email');
+            expect(response.body.data).toHaveProperty('url');
+            expect(response.body).toHaveProperty('message');
+        });
+
+        it('/mail-confirmation/mailToken', async () => {
+            const response = await request(app).post(
+                `/api/auth/mail-confirmation/${mailToken}`
+            );
+
+            expect(response.statusCode).toEqual(200);
+            expect(response.body).toHaveProperty('message');
         });
 
         it('/login', async () => {
@@ -50,24 +62,23 @@ describe('authentication endpoints', () => {
                 .post('/api/auth//login')
                 .send(payload);
 
-            const responseObject = {
-                data: { email: payload.email },
-                message: 'success',
-            };
+            cookie = response.headers['set-cookie'][0]
+                .split('jwt=')[1]
+                .split(';')[0];
 
             expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual(responseObject);
+            expect(response.body).toHaveProperty('data');
+            expect(response.body.data).toHaveProperty('email');
+            expect(response.body).toHaveProperty('message');
         });
 
         it('/logout', async () => {
-            const response = await request(app).get('/api/auth/logout');
-
-            const responseObject = {
-                message: 'success',
-            };
+            const response = await request(app)
+                .get('/api/auth/logout')
+                .set('Cookie', cookie);
 
             expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual(responseObject);
+            expect(response.body).toHaveProperty('message');
         });
 
         it('/forgot-password', async () => {
@@ -79,54 +90,79 @@ describe('authentication endpoints', () => {
                 .post('/api/auth/forgot-password')
                 .send(payload);
 
-            const responseObject = {
-                data: payload,
-                message: 'success',
-            };
+            resetToken = response.headers.resettoken;
 
             expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual(responseObject);
+            expect(response.body).toHaveProperty('message');
         });
 
         it('/password-reset/resetToken', async () => {
             const payload = {
-                confirmPassword: '123456789',
-                password: '123456789',
-                resetToken: 'resetToken',
+                password1: 'hablabla',
+                password2: 'hablabla',
             };
 
             const response = await request(app)
-                .post('/api/auth/password-reset/resetToken')
+                .post(`/api/auth/password-reset/${resetToken}`)
                 .send(payload);
 
-            const responseObject = {
-                data: {
-                    password: '123456789',
-                    resetToken: 'resetToken',
-                },
-                message: 'success',
+            expect(response.statusCode).toEqual(200);
+            expect(response.body).toHaveProperty('message');
+        });
+    });
+
+    describe('given user based post/get failure endpoints', () => {
+        it('/register without a req prop', async () => {
+            const payload = {
+                username: 'adamoss',
+                email: 'adamoss@sample.com',
             };
 
-            expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual(responseObject);
+            const response = await request(app)
+                .post('/api/auth/register')
+                .send(payload);
+
+            expect(response.statusCode).toEqual(422);
+            expect(response.body).toEqual({
+                message: '"password" is required',
+            });
         });
 
-        it('/mail-confirmation/mailToken', async () => {
+        it('/register with an already exist prop', async () => {
             const payload = {
-                mailToken: 'mailToken',
+                username: 'adamoss',
+                email: 'adamoss@sample.com',
+                password: 'hablabla',
             };
 
             const response = await request(app)
-                .post('/api/auth/mail-confirmation/mailToken')
+                .post('/api/auth/register')
                 .send(payload);
 
-            const responseObject = {
-                data: payload,
-                message: 'success',
+            expect(response.statusCode).toEqual(400);
+            expect(response.body).toEqual({
+                message: 'Object already exists',
+            });
+        });
+
+        it('/login without a req prop', async () => {
+            const payload = {
+                email: 'adamoss@sample.com',
             };
 
-            expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual(responseObject);
+            const response = await request(app)
+                .post('/api/auth//login')
+                .send(payload);
+
+            expect(response.statusCode).toEqual(422);
+            expect(response.body).toHaveProperty('message');
+        });
+
+        it('/logout without auth', async () => {
+            const response = await request(app).get('/api/auth/logout');
+
+            expect(response.statusCode).toEqual(401);
+            expect(response.body).toHaveProperty('message');
         });
     });
 
@@ -136,7 +172,6 @@ describe('authentication endpoints', () => {
 
             await mongoose.connection.close();
         } catch (error) {
-            console.log(error.message);
             process.exit(1);
         }
     });
