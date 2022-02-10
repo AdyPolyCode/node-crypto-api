@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { MongoError } = require('mongoose/node_modules/mongodb/lib');
 
 const Parser = require('./common/parser');
 const LoggerService = require('./logger.service');
@@ -6,23 +7,25 @@ const LoggerService = require('./logger.service');
 const { NotFound } = require('../errors');
 
 class ErrorService extends Parser {
-    #mongooseOptions = {
-        11000: {
-            statusCode: 400,
-            message: 'Object already exists',
-        },
-        CastError: {
-            statusCode: 400,
-            message: 'Invalid object identifier',
-        },
-        ValidationError: {
-            statusCode: 422,
-            message: null,
-        },
-    };
+    #mongooseOptions;
 
     constructor() {
         super();
+
+        this.#mongooseOptions = {
+            MongoServerError: {
+                statusCode: 400,
+                message: 'Object already exists',
+            },
+            CastError: {
+                statusCode: 400,
+                message: 'Invalid object identifier',
+            },
+            ValidationError: {
+                statusCode: 422,
+                message: null,
+            },
+        };
 
         this.handleException = this.handleException.bind(this);
     }
@@ -32,8 +35,8 @@ class ErrorService extends Parser {
 
         const result = { message: error.message, statusCode: error.statusCode };
 
-        if (error instanceof mongoose.Error) {
-            const err = this.#mongooseOptions[error.code || error.name];
+        if (error instanceof mongoose.Error || error instanceof MongoError) {
+            const err = this.#mongooseOptions[error.name];
 
             if (err.message) {
                 result.message = err.message;
