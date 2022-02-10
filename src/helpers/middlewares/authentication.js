@@ -30,7 +30,7 @@ class Authentication {
     /* eslint-disable consistent-return */
     async #authenticateIt(req, res, next) {
         try {
-            const cookieToken = req.cookies.jwt;
+            const cookieToken = req.cookies.jwt || req.headers.cookie;
 
             if (!cookieToken) {
                 return next(new Unauthorized('Authentication is required'));
