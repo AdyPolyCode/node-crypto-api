@@ -36,8 +36,8 @@ module.exports = (app) => {
     app.use('/api/auth', authRouter);
     app.use('/api/crypto', cryptoRouter);
 
-    app.use(ErrorService.handleNotFound);
-    app.use(ErrorService.handleException);
+    app.use(ErrorService.handleNotFound());
+    app.use(ErrorService.handleException());
 
     return app;
 };
