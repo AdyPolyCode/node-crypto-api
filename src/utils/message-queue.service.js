@@ -33,9 +33,9 @@ module.exports = class MessageQueueService {
         await channel.bindQueue(queue.queue, 'exOne', type);
 
         await channel.consume(queue.queue, async (msg) => {
-            const data = JSON.parse(msg.content.toString('utf8'));
-
             try {
+                const data = JSON.parse(msg.content.toString('utf8'));
+
                 await transporter.sendMail(data);
 
                 channel.ack(msg);
