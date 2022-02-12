@@ -10,19 +10,11 @@ class CryptoController extends ServiceHandler {
 
     getMarkets() {
         return asyncHandler(async (req, res) => {
-            const markets = await this.cryptoService.getMarkets(req.query);
-
-            res.json({ data: markets });
-        });
-    }
-
-    getCurrencyMetaData() {
-        return asyncHandler(async (req, res) => {
-            const currencies = await this.cryptoService.getCurrencyMetaData(
-                req.query
+            const markets = await this.cryptoService.getMarkets(
+                req.query.queries
             );
 
-            res.json({ data: currencies });
+            res.json({ data: markets });
         });
     }
 }
