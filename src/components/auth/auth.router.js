@@ -28,6 +28,6 @@ Router.post(
     PayloadValidation.validate(register),
     AuthController.register()
 );
-Router.get('/logout', Authentication.authenticate, AuthController.logout());
+Router.get('/logout', Authentication.authenticateIt(), AuthController.logout());
 
 module.exports = Router;
