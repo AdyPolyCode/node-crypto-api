@@ -26,8 +26,6 @@ class ErrorService extends Parser {
                 message: null,
             },
         };
-
-        this.handleException = this.handleException.bind(this);
     }
 
     parse(error) {
@@ -48,22 +46,26 @@ class ErrorService extends Parser {
         return result;
     }
 
-    handleException(err, req, res, next) {
-        const { message, statusCode } = this.parse(err);
+    handleException() {
+        return (err, req, res, next) => {
+            const { message, statusCode } = this.parse(err);
 
-        LoggerService.error(err.message);
+            LoggerService.error(err.message);
 
-        res.status(statusCode || 500).json({
-            message: message || 'Server error',
-        });
+            res.status(statusCode || 500).json({
+                message: message || 'Server error',
+            });
+        };
     }
 
-    handleNotFound(req, res, next) {
-        next(
-            new NotFound(
-                `There is no page for requested endpoint - "${req.path}"`
-            )
-        );
+    handleNotFound() {
+        return (req, res, next) => {
+            next(
+                new NotFound(
+                    `There is no page for requested endpoint - "${req.path}"`
+                )
+            );
+        };
     }
 }
 
