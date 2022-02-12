@@ -1,28 +1,29 @@
-const { model } = require('mongoose');
-
 const { Forbidden } = require('../../errors');
+const UserService = require('../../components/user/user.service');
 
 /* eslint-disable consistent-return */
 class Authorization {
-    constructor() {
-        this.authorize = this.#authorizeIt.bind(this);
+    constructor(userService) {
+        this.userService = new userService();
+
+        this.roles = ['admin', 'user'];
     }
 
     #checkRole(role) {
-        const roles = ['admin', 'user'];
-
-        if (!role || !roles.includes(role)) {
+        if (!role || !this.roles.includes(role)) {
             return new Forbidden('You are not allowed to do this');
         }
     }
 
-    async #authorizeIt(req, res, next) {
-        const user = await model('User').findById(req.userId);
+    authorizeIt() {
+        return async (req, res, next) => {
+            const user = await this.userService.findById(req.userId);
 
-        this.#checkRole(user.role);
+            this.#checkRole(user.role);
 
-        next();
+            next();
+        };
     }
 }
 
-module.exports = new Authorization();
+module.exports = new Authorization(UserService);

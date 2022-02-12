@@ -7,7 +7,6 @@ const UserService = require('../../components/user/user.service');
 class Authentication {
     constructor(userService) {
         this.userService = new userService();
-        this.authenticate = this.#authenticateIt.bind(this);
     }
 
     #validateJWT(token) {
@@ -28,28 +27,30 @@ class Authentication {
     }
 
     /* eslint-disable consistent-return */
-    async #authenticateIt(req, res, next) {
-        try {
-            const cookieToken = req.cookies.jwt || req.headers.cookie;
+    authenticateIt() {
+        return async (req, res, next) => {
+            try {
+                const cookieToken = req.cookies.jwt || req.headers.cookie;
 
-            if (!cookieToken) {
-                return next(new Unauthorized('Authentication is required'));
+                if (!cookieToken) {
+                    return next(new Unauthorized('Authentication is required'));
+                }
+
+                const token = this.#validateJWT(cookieToken);
+
+                const user = await this.userService.findById(token.id);
+
+                if (!user.isVerified) {
+                    return next(new BadRequest('Please confirm your email'));
+                }
+
+                req.userId = token.id;
+
+                next();
+            } catch (error) {
+                next(error);
             }
-
-            const token = this.#validateJWT(cookieToken);
-
-            const user = await this.userService.findById(token.id);
-
-            if (!user.isVerified) {
-                return next(new BadRequest('Please confirm your email'));
-            }
-
-            req.userId = token.id;
-
-            next();
-        } catch (error) {
-            next(error);
-        }
+        };
     }
     /* eslint-enable consistent-return */
 }
