@@ -43,7 +43,6 @@ class AuthController extends ServiceHandler {
                 message: 'success',
                 data: {
                     email: user.email,
-                    mailToken,
                     url,
                 },
             });
