@@ -33,6 +33,10 @@ class ConfigService {
                 user: process.env.MAIL_USER,
                 pass: process.env.MAIL_PASS,
             },
+            pool: true,
+            rateLimit: true,
+            maxConnection: 1,
+            maxMessage: 3,
         };
     }
 
