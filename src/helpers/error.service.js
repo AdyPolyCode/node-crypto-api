@@ -50,7 +50,7 @@ class ErrorService extends Parser {
         return (err, req, res, next) => {
             const { message, statusCode } = this.parse(err);
 
-            LoggerService.error(err.message);
+            LoggerService.error(err.stack);
 
             res.status(statusCode || 500).json({
                 message: message || 'Server error',
