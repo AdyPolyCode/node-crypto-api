@@ -20,18 +20,6 @@ addColors({
 });
 
 module.exports = createLogger({
-    transports: [
-        new transports.Console({
-            level: 'error',
-            format: format.combine(format.colorize(), pretty),
-        }),
-        new transports.Console({
-            level: 'info',
-            format: format.combine(format.colorize(), pretty),
-        }),
-        new transports.Console({
-            level: 'warn',
-            format: format.combine(format.colorize(), pretty),
-        }),
-    ],
+    format: pretty,
+    transports: [new transports.Console()],
 });
