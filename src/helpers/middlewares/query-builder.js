@@ -32,7 +32,7 @@ class QueryBuilderService {
 
     parseIt() {
         return (req, res, next) => {
-            const queries = this.#parseCommon(req.query, req.url);
+            const queries = this.#parseCommon(req.url);
 
             req.query = { queries };
 
