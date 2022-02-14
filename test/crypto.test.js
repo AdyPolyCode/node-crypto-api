@@ -1,16 +1,16 @@
-// require('dotenv').config({ path: '../.env' });
+require('dotenv').config({ path: '../.env' });
 
-// const mongoose = require('mongoose');
-// const request = require('supertest');
-// const expressApp = require('express')();
+const request = require('supertest');
+const expressApp = require('express')();
 
-// const expressLoader = require('../src/loaders/express.loader');
-// const connectDB = require('../src/loaders/database.loader.js');
+const expressLoader = require('../src/loaders/express.loader');
 
-// const app = expressLoader(expressApp);
+const app = expressLoader(expressApp);
 
-describe('sample test', () => {
-    it('given sample should be true', () => {
-        expect(true).toBe(true);
+describe('given crypto based get endpoints', () => {
+    it('/markets', async () => {
+        const response = await request(app).get('/api/crypto/markets');
+
+        expect(response.status).toEqual(200);
     });
 });
