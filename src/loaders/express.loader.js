@@ -1,4 +1,5 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
 
 const helmet = require('helmet');
 const cors = require('cors');
@@ -9,7 +10,10 @@ const { ErrorService } = require('../helpers');
 const authRouter = require('../components/auth/auth.router');
 const cryptoRouter = require('../components/crypto-token/crypto.router');
 
+const swaggerConfig = require('../config/swagger-config');
+
 module.exports = (app) => {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig));
     app.use(
         cors({
             origin: '*',
