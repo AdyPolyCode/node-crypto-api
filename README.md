@@ -14,11 +14,22 @@
 
 ### General-Information
 
+Authentication based personal project. Purpose of this project was learn other way of implementing AUTH, also to learn about websockets. API provides data manipulation only for users who are either signed in & has verified account. Authentication is enabled with JWT which is then signed as a cookie before response. API also provides verification for newly created accounts by MAIL SYSTEM. CRUD operations on products can be made only by valid & authenticated users. Database can store 2 types of users:
+
+-   BASIC: can only fetch resources from the database
+-   ADMIN: can do everything
+
 ### Features
 
 -   REST API
 
 -   CommonJS
+
+-   Authentication/Authorization:
+
+    -   user role check
+
+    -   user authenticity check
 
 -   Authentication system:
 
@@ -29,6 +40,8 @@
     -   Logout
 
     -   Account confirmation
+
+    -   Forgot password
 
     -   Password reset
 
@@ -52,7 +65,7 @@
 
 ## Documentation
 
--   external:
+-   internal: http://localhost:{port}/api-docs
 
 ### Setup
 
